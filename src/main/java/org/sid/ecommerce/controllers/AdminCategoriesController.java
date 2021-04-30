@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.IOUtils;
@@ -20,10 +22,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping(value="/adminCat")
-public class AdminCategoriesController {
+public class AdminCategoriesController implements HandlerExceptionResolver{
 	@Autowired
 	private IAdminCategoriesMetier metier;
 	@RequestMapping(value="/index")
@@ -34,7 +38,8 @@ public class AdminCategoriesController {
 	}
 	// ajouter une categorie 
 	@RequestMapping(value="saveCat" , method = RequestMethod.POST)
-	public String saveCat(@Valid Categorie c ,BindingResult bindingResult, Model model, @RequestParam("file") MultipartFile multipartFile) throws IOException
+	public String saveCat(@Valid Categorie c ,BindingResult bindingResult, Model model, @RequestParam("file") MultipartFile multipartFile) 
+			throws IOException
 	{
 		
 		/*  Si Il ya des Erruers */
@@ -70,6 +75,14 @@ public class AdminCategoriesController {
 	{
 		Categorie c = metier.getCategorie(idCat);
 		return IOUtils.toByteArray(new ByteArrayInputStream(c.getPhoto()));
+	}
+	@Override
+	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, 
+			Object handler, Exception ex) {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("exception", ex.getMessage());
+		mv.setViewName("categories");
+		return mv;
 	}
 	
 	
